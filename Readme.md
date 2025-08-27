@@ -1,6 +1,6 @@
 
 🛡️ Proyecto de Solución de Ciberseguridad para el Sector Financiero
-Análisis y Mitigación de un Ataque Complejo Basado en el Caso BCP
+Análisis y Mitigación de un Ataque Complejo Basado en el Caso XYZ
 📄 Resumen Ejecutivo
 
 Este proyecto presenta una solución de ciberseguridad integral y de extremo a extremo, diseñada para proteger a una institución financiera contra ciberataques modernos y multifacéticos. Tomando como base un caso de estudio realista que involucra spear-phishing, movimiento lateral y ransomware, se propone una arquitectura de Defensa en Profundidad utilizando herramientas líderes del cuadrante de Gartner ("Best-of-Breed").
@@ -11,7 +11,7 @@ El entregable principal es una arquitectura documentada y justificada, acompaña
 
 💥 El Caso de Estudio: Un Ataque en Múltiples Fases
 
-El escenario se basa en un ataque devastador contra una entidad financiera (Banco Global / BCP), cuya cadena de ataque se resume en los siguientes pasos:
+El escenario se basa en un ataque devastador contra una entidad financiera (Banco Global / XYZ), cuya cadena de ataque se resume en los siguientes pasos:
 
 Entrada Inicial: Un correo de spear-phishing dirigido a un empleado, con un enlace que redirige a un sitio web malicioso.
 
@@ -140,7 +140,7 @@ expand_less
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solución de Seguridad "Best-of-Breed" para BCP - Diagrama v2</title>
+    <title>Solución de Seguridad "Best-of-Breed" para XYZ - Diagrama v2</title>
     <style>
         :root {
             --bg-color: #f4f7fa;
@@ -274,7 +274,7 @@ expand_less
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛡️ Solución de Seguridad "Best-of-Breed" para BCP</h1>
+            <h1>🛡️ Solución de Seguridad "Best-of-Breed" para XYZ</h1>
             <p>Simulación de Defensa Integrada con Microsoft, CrowdStrike, Netskope y Palo Alto Networks</p>
         </div>
         <main class="main-content">
@@ -442,4 +442,4 @@ expand_less
         });
     </script>
 </body>
-</html>
+</html>  

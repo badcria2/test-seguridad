@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arquitectura de Seguridad XYZ</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f9fafb 0%,
+          #f1f5f9 50%,
+          #e2e8f0 100%
+        );
+        color: #1f2937;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      .app-container {
+        display: grid;
+        grid-template-areas:
+          "header header header"
+          "sidebar main panel"
+          "footer footer footer";
+        grid-template-rows: auto 1fr auto;
+        grid-template-columns: 300px 1fr 320px;
+        min-height: 100vh;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      /* HEADER */
+      .header {
+        grid-area: header;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2563eb;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        color: #64748b;
+        font-size: 1rem;
+      }
+
+      /* SIDEBAR - CONTROLES */
+      .sidebar {
+        grid-area: sidebar;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        overflow-y: auto;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #16a34a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .control-section {
+        margin-bottom: 24px;
+      }
+
+      .control-section h3 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .control-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: #f9fafb;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .control-item:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+      }
+
+      .control-item.active {
+        background: #dcfce7;
+        border-color: #16a34a;
+      }
+
+      .control-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+      }
+
+      .control-icon {
+        font-size: 1.25rem;
+      }
+
+      .control-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1e293b;
+      }
+
+      .control-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #cbd5e1;
+        transition: all 0.2s ease;
+      }
+
+      .control-status.active {
+        background: #16a34a;
+        box-shadow: 0 0 8px rgba(22, 163, 74, 0.5);
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .action-btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+
+      .action-btn.primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+      }
+
+      .action-btn.success {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+      }
+
+      .action-btn.warning {
+        background: linear-gradient(135deg, #facc15, #eab308);
+        color: white;
+      }
+
+      .action-btn.danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      }
+
+      /* MAIN CONTENT - DIAGRAMA */
+      .main-content {
+        grid-area: main;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .diagram-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 20px;
+        height: 100%;
+        min-height: 600px;
+      }
+
+      .security-layer {
+        background: #f9fafb;
+        border: 2px solid;
+        border-radius: 12px;
+        padding: 16px;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .security-layer:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      }
+
+      .layer-header {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 16px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      .layer-components {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 12px;
+        height: calc(100% - 60px);
+      }
+
+      /* COMPONENTES DE SEGURIDAD */
+      .security-component {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .security-component:hover {
+        transform: translateY(-4px);
+        border-color: #60a5fa;
+        box-shadow: 0 6px 16px rgba(96, 165, 250, 0.25);
+      }
+
+      .component-icon {
+        font-size: 1.5rem;
+        margin-bottom: 4px;
+      }
+
+      .component-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        color: #334155;
+        line-height: 1.2;
+      }
+
+      .status-dot {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #22c55e;
+        border: 2px solid #f9fafb;
+        animation: pulse 2s infinite;
+      }
+
+      .status-dot.warning {
+        background: #facc15;
+      }
+      .status-dot.danger {
+        background: #ef4444;
+      }
+      .status-dot.active {
+        background: #3b82f6;
+      }
+
+      /* CAPAS ESPECÍFICAS */
+      .layer-threat {
+        grid-column: 1 / -1;
+        border-color: #ef4444;
+      }
+      .layer-threat .layer-header {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+      }
+
+      .layer-email {
+        border-color: #8b5cf6;
+      }
+      .layer-email .layer-header {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+
+      .layer-perimeter {
+        border-color: #f59e0b;
+      }
+      .layer-perimeter .layer-header {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+      }
+
+      .layer-endpoint {
+        border-color: #06b6d4;
+      }
+      .layer-endpoint .layer-header {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+      }
+
+      .layer-identity {
+        border-color: #8b5cf6;
+      }
+      .layer-identity .layer-header {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+
+      .layer-siem {
+        grid-column: 1 / -1;
+        border-color: #16a34a;
+      }
+      .layer-siem .layer-header {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+      }
+
+      /* PANEL DERECHO */
+      .info-panel {
+        grid-area: panel;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        overflow-y: auto;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .panel-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2563eb;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .info-card {
+        background: #f9fafb;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 4px solid;
+      }
+
+      .info-card.confidentiality {
+        border-left-color: #3b82f6;
+      }
+      .info-card.integrity {
+        border-left-color: #16a34a;
+      }
+      .info-card.availability {
+        border-left-color: #f59e0b;
+      }
+
+      .card-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1e293b;
+      }
+
+      .card-content {
+        font-size: 0.8rem;
+        color: #475569;
+        line-height: 1.4;
+      }
+
+      /* FOOTER - MÉTRICAS */
+      .footer {
+        grid-area: footer;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+      }
+
+      .metric-card {
+        text-align: center;
+        padding: 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #16a34a;
+        line-height: 1;
+      }
+
+      .metric-label {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-top: 4px;
+      }
+
+      /* NOTIFICACIONES */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: #1f2937;
+        max-width: 400px;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        border-left: 4px solid;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+
+      .notification.success {
+        border-left-color: #16a34a;
+      }
+      .notification.warning {
+        border-left-color: #f59e0b;
+      }
+      .notification.error {
+        border-left-color: #ef4444;
+      }
+      .notification.info {
+        border-left-color: #2563eb;
+      }
+
+      /* CONEXIONES ANIMADAS */
+      .connections {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .connection-line {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, #2563eb, #16a34a);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        border-radius: 1px;
+      }
+
+      .connection-line.active {
+        opacity: 0.6;
+        animation: flow 2s infinite linear;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 1200px) {
+        .app-container {
+          grid-template-areas:
+            "header"
+            "main"
+            "footer";
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar,
+        .info-panel {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .diagram-container {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        .layer-threat,
+        .layer-siem {
+          grid-column: 1;
+        }
+
+        .metrics-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* ANIMACIONES */
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.8;
+        }
+      }
+
+      @keyframes flow {
+        0% {
+          box-shadow: 0 0 0 rgba(96, 165, 250, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(96, 165, 250, 1);
+        }
+        100% {
+          box-shadow: 0 0 0 rgba(96, 165, 250, 0.5);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- HEADER -->
+      <header class="header">
+        <h1>🛡️ Arquitectura de Seguridad Propuesta</h1>
+        <p>Solución Best-of-Breed con Herramientas Líderes</p>
+      </header>
+
+      <!-- SIDEBAR - CONTROLES -->
+      <aside class="sidebar">
+        <div class="sidebar-title">🛡️ Controles Preventivos</div>
+
+        <div class="control-section">
+          <h3>Email Security</h3>
+          <div class="control-item" data-control="safe-links">
+            <div class="control-info">
+              <span class="control-icon">🔗</span>
+              <span class="control-text">Safe Links</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+          <div class="control-item" data-control="safe-attachments">
+            <div class="control-info">
+              <span class="control-icon">📎</span>
+              <span class="control-text">Safe Attachments</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+          <div class="control-item" data-control="safe-attachments">
+            <div class="control-info">
+              <span class="control-icon">🦠</span>
+              <span class="control-text">Antimalware</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+
+          <div class="control-item" data-control="safe-attachments">
+            <div class="control-info">
+              <span class="control-icon">⚓</span>
+              <span class="control-text">Protección contra phishing</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h3>Network Protection</h3>
+          <div class="control-item" data-control="firewall">
+            <div class="control-info">
+              <span class="control-icon">🧱</span>
+              <span class="control-text">Next-Gen Firewall</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+          <div class="control-item" data-control="ids">
+            <div class="control-info">
+              <span class="control-icon">🚨</span>
+              <span class="control-text">Intrusion Detection</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h3>Identity & Access</h3>
+          <div class="control-item" data-control="mfa">
+            <div class="control-info">
+              <span class="control-icon">🔐</span>
+              <span class="control-text">Multi-Factor Auth</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+          <div class="control-item" data-control="conditional">
+            <div class="control-info">
+              <span class="control-icon">🚪</span>
+              <span class="control-text">Conditional Access</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h3>Otros</h3>
+          <div class="control-item" data-control="firewall">
+            <div class="control-info">
+              <span class="control-icon">📧</span>
+              <span class="control-text">Robustecer (DKIM, DMARC, SPF)</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+          <div class="control-item" data-control="ids">
+            <div class="control-info">
+              <span class="control-icon">🚨</span>
+              <span class="control-text">Alerta de suplantación de marca</span>
+            </div>
+            <div class="control-status"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <div class="connections" id="connections"></div>
+
+        <div class="diagram-container">
+          <!-- CAPA DE AMENAZAS -->
+          <div class="security-layer layer-threat">
+            <div class="layer-header">🌐 Amenazas Externas</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="phishing">
+                <div class="component-icon">🎣</div>
+                <div class="component-label">Phishing</div>
+                <div class="status-dot danger"></div>
+              </div>
+
+              <div class="security-component" data-tool="malware">
+                <div class="component-icon">🦠</div>
+                <div class="component-label">Malware</div>
+                <div class="status-dot danger"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMAIL SECURITY -->
+          <div class="security-layer layer-email">
+            <div class="layer-header">📧 Email Security</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="defender-o365">
+                <div class="component-icon">🛡️</div>
+                <div class="component-label">Defender O365</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="proofpoint">
+                <div class="component-icon">📬</div>
+                <div class="component-label">Proofpoint</div>
+                <div class="status-dot"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PERÍMETRO -->
+          <div class="security-layer layer-perimeter">
+            <div class="layer-header">🛡️ Network</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="cloudflare">
+                <div class="component-icon">☁️</div>
+                <div class="component-label">Cloudflare</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="paloalto">
+                <div class="component-icon">🧱</div>
+                <div class="component-label">Palo Alto</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="zscaler">
+                <div class="component-icon">🌐</div>
+                <div class="component-label">Zscaler / Netskope</div>
+                <div class="status-dot"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ENDPOINTS -->
+          <div class="security-layer layer-endpoint">
+            <div class="layer-header">💻 Endpoints</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="crowdstrike">
+                <div class="component-icon">🦅</div>
+                <div class="component-label">CrowdStrike</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="sentinelone">
+                <div class="component-icon">👁️</div>
+                <div class="component-label">SentinelOne</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="carbon-black">
+                <div class="component-icon">🛡️</div>
+                <div class="component-label">Defender for Endpoint</div>
+                <div class="status-dot"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- IDENTIDAD -->
+          <div class="security-layer layer-identity">
+            <div class="layer-header">🔑 Identidad & Acceso</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="okta">
+                <div class="component-icon">🔐</div>
+                <div class="component-label">Okta SSO</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="cyberark">
+                <div class="component-icon">🏰</div>
+                <div class="component-label">CyberArk</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="azure-ad">
+                <div class="component-icon">🆔</div>
+                <div class="component-label">Microsoft Entra ID</div>
+                <div class="status-dot"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SIEM/SOAR -->
+          <div class="security-layer layer-siem">
+            <div class="layer-header">📊 SIEM & Orchestration</div>
+            <div class="layer-components">
+              <div class="security-component" data-tool="splunk">
+                <div class="component-icon">📈</div>
+                <div class="component-label">Splunk</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="sentinel">
+                <div class="component-icon">🧠</div>
+                <div class="component-label">Sentinel</div>
+                <div class="status-dot"></div>
+              </div>
+              <div class="security-component" data-tool="qradar">
+                <div class="component-icon">📊</div>
+                <div class="component-label">QRadar</div>
+                <div class="status-dot"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- INFO PANEL -->
+<aside class="info-panel">
+ <div class="panel-title">📋 Capacidades CIA</div>
+
+ <div class="info-card confidentiality">
+   <div class="card-title">🔐 CONFIDENCIALIDAD</div>
+   <div class="card-content">
+     <strong>Zero Trust Access:</strong> MFA adaptativo + Conditional Access<br />
+     <em>→ Okta SSO + Microsoft Entra ID</em><br />
+     <strong>PAM:</strong> Rotación automática credenciales privilegiadas<br />
+     <em>→ CyberArk Privileged Access</em><br />
+     <strong>Data Classification:</strong> Etiquetado automático + DLP<br />
+     <em>→ Defender O365 + Proofpoint DLP</em><br /> 
+     <strong>Microsegmentación:</strong> Aislamiento granular de recursos<br />
+     <em>→ Crowdstrike</em>
+   </div>
+ </div>
+
+ <div class="info-card integrity">
+   <div class="card-title">✅ INTEGRIDAD</div>
+   <div class="card-content">
+     <strong>EDR/XDR:</strong> Análisis comportamental + rollback automático<br />
+     <em>→ CrowdStrike Falcon + SentinelOne</em><br />
+     <strong>Domain:</strong> DMARC/DKIM/SPF <br />
+     <em>→ Defender O365 Safe Attachments + Proofpoint</em><br />
+     <strong>Network IPS:</strong> Firmas actualizadas + threat intel<br />
+     <em>→ Palo Alto Threat Prevention + Cloudflare WAF</em><br />
+     <strong>File Monitoring:</strong> Checksums + alertas tiempo real<br />
+     <em>→ Defender for Endpoint + CrowdStrike</em><br />  
+   </div>
+ </div>
+
+ <div class="info-card availability">
+   <div class="card-title">🔄 DISPONIBILIDAD</div>
+   <div class="card-content">
+     <strong>DDoS Shield:</strong> 275+ PoPs + 154 Tbps capacidad<br />
+     <em>→ Cloudflare DDoS Protection</em><br />
+     <strong>Redundancia:</strong> Failover automático + load balancing<br />
+     <em>→ Cloudflare Load Balancer + Palo Alto HA</em><br />
+     <strong>MTTR:</strong> Respuesta automatizada < 30 minutos<br />
+     <em>→ Splunk SOAR + Microsoft Sentinel</em><br /> 
+     <strong>SLA:</strong> 99.99% uptime garantizado<br />
+     <em>→ Cloudflare + QRadar Monitoring</em>
+   </div>
+ </div>
+</aside>
+
+      <!-- FOOTER - MÉTRICAS -->
+      <footer class="footer">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="threats-blocked">0</div>
+            <div class="metric-label">Amenazas Bloqueadas</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="response-time">< 1s</div>
+            <div class="metric-label">Tiempo Respuesta</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="coverage">99.8%</div>
+            <div class="metric-label">Cobertura</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" id="uptime">99.99%</div>
+            <div class="metric-label">Disponibilidad</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Estado global
+      let currentMetrics = {
+        threats: 0,
+        responseTime: "< 1s",
+        coverage: "99.8%",
+        uptime: "99.99%",
+      };
+      let animationTimeouts = [];
+
+      // Inicialización
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeEventListeners();
+        startMetricsUpdate();
+        showNotification("Sistema de seguridad iniciado", "success");
+      });
+
+      // Event listeners
+      function initializeEventListeners() {
+        // Control items
+        document.querySelectorAll(".control-item").forEach((item) => {
+          item.addEventListener("click", function () {
+            toggleControl(this);
+          });
+        });
+
+        // Security components
+        document
+          .querySelectorAll(".security-component")
+          .forEach((component) => {
+            component.addEventListener("click", function () {
+              showComponentInfo(this.dataset.tool);
+            });
+          });
+      }
+
+      // Funciones principales
+      function activatePreventive() {
+        clearTimeouts();
+        showNotification("Activando controles preventivos...", "info");
+
+        const controls = document.querySelectorAll(".control-item");
+        controls.forEach((control, index) => {
+          animationTimeouts.push(
+            setTimeout(() => {
+              control.classList.add("active");
+              const status = control.querySelector(".control-status");
+              status.classList.add("active");
+
+              if (index === controls.length - 1) {
+                showNotification("Controles preventivos activados", "success");
+                updateMetrics(0, "< 100ms", "99.9%", "100%");
+              }
+            }, index * 200)
+          );
+        });
+      }
+
+      function simulateFlow() {
+        clearTimeouts();
+        showNotification("Iniciando flujo normal...", "info");
+
+        const components = document.querySelectorAll(
+          '.security-component:not([data-tool*="attacker"]):not([data-tool*="malware"]):not([data-tool*="phishing"])'
+        );
+        components.forEach((component, index) => {
+          animationTimeouts.push(
+            setTimeout(() => {
+              const dot = component.querySelector(".status-dot");
+              dot.classList.remove("warning", "danger");
+              dot.classList.add("active");
+
+              if (index === components.length - 1) {
+                showNotification("Sistema operando normalmente", "success");
+              }
+            }, index * 150)
+          );
+        });
+      }
+
+      function simulateAttack() {
+        clearTimeouts();
+        currentMetrics.threats = 0;
+        showNotification("Simulando ataque APT...", "warning");
+
+        // Fase 1: Email Attack
+        animationTimeouts.push(
+          setTimeout(() => {
+            showComponentAlert("defender-o365", "Email malicioso detectado");
+            incrementThreats();
+          }, 1000)
+        );
+
+        // Fase 2: Perimeter Defense
+        animationTimeouts.push(
+          setTimeout(() => {
+            showComponentAlert("cloudflare", "DDoS mitigado");
+            incrementThreats();
+          }, 2000)
+        );
+
+        // Fase 3: Endpoint Detection
+        animationTimeouts.push(
+          setTimeout(() => {
+            showComponentAlert("crowdstrike", "Malware bloqueado");
+            incrementThreats();
+          }, 3000)
+        );
+
+        // Fase 4: Identity Protection
+        animationTimeouts.push(
+          setTimeout(() => {
+            showComponentAlert("okta", "Acceso sospechoso bloqueado");
+            incrementThreats();
+          }, 4000)
+        );
+
+        // Final
+        animationTimeouts.push(
+          setTimeout(() => {
+            showNotification(
+              `Ataque neutralizado: ${currentMetrics.threats} amenazas bloqueadas`,
+              "success"
+            );
+            updateMetrics(currentMetrics.threats, "< 500ms", "100%", "99.99%");
+          }, 5000)
+        );
+      }
+
+      function emergencyMode() {
+        const confirmed = confirm(
+          "¿Activar modo de emergencia? Esto bloqueará todo tráfico no esencial."
+        );
+
+        if (confirmed) {
+          clearTimeouts();
+          showNotification("MODO EMERGENCIA ACTIVADO", "error");
+
+          const components = document.querySelectorAll(".security-component");
+          components.forEach((component) => {
+            const dot = component.querySelector(".status-dot");
+            dot.classList.add("danger");
+          });
+
+          updateMetrics(0, "< 50ms", "100%", "99.5%");
+        }
+      }
+
+      // Funciones auxiliares
+      function toggleControl(controlItem) {
+        const isActive = controlItem.classList.contains("active");
+        const status = controlItem.querySelector(".control-status");
+        const controlName = controlItem.dataset.control;
+
+        if (isActive) {
+          controlItem.classList.remove("active");
+          status.classList.remove("active");
+          showNotification(`${controlName} desactivado`, "warning");
+        } else {
+          controlItem.classList.add("active");
+          status.classList.add("active");
+          showNotification(`${controlName} activado`, "success");
+        }
+      }
+
+      function showComponentAlert(toolName, message) {
+        const component = document.querySelector(`[data-tool="${toolName}"]`);
+        if (component) {
+          const dot = component.querySelector(".status-dot");
+          dot.classList.add("warning");
+
+          setTimeout(() => {
+            dot.classList.remove("warning");
+            dot.classList.add("active");
+          }, 1500);
+        }
+
+        showNotification(message, "warning");
+      }
+
+      function showComponentInfo(toolName) {
+        const toolInfo = {
+          // Email Security Layer
+          "defender-o365": "Microsoft Defender for Office 365 - Protección avanzada contra amenazas de email con Safe Links, Safe Attachments, sandboxing de archivos y análisis de comportamiento para detectar phishing sofisticado y malware zero-day.",
+          
+          "proofpoint": "Proofpoint Email Protection - Líder en protección de email empresarial con tecnología de machine learning, sandboxing avanzado, protección contra BEC (Business Email Compromise) y análisis de URL en tiempo real.",
+
+          // Network/Perimeter Security  
+          "cloudflare": "Cloudflare Security - WAF (Web Application Firewall) global, protección DDoS a escala masiva, filtrado DNS, bot management y aceleración de contenido con 275+ centros de datos worldwide.",
+          
+          "paloalto": "Palo Alto Networks Next-Generation Firewall - NGFW líder con inspección profunda de paquetes, prevención de intrusiones (IPS), filtrado de URL, análisis de malware y visibilidad completa de aplicaciones.",
+          
+          "zscaler": "Zscaler Zero Trust Exchange - Plataforma SASE cloud-native que proporciona secure web gateway, CASB, firewall como servicio y acceso de red de confianza cero (ZTNA).",
+
+          // Endpoint Security
+          "crowdstrike": "CrowdStrike Falcon - Plataforma EDR/XDR líder con inteligencia artificial, detección de comportamiento en tiempo real, threat hunting proactivo y respuesta automatizada a incidentes. Protección sin agente con telemetría completa.",
+          
+          "sentinelone": "SentinelOne Singularity - Plataforma autónoma de ciberseguridad con IA que combina EPP, EDR y respuesta automática. Rollback automático de ataques, detección de amenazas fileless y protección zero-trust para endpoints.",
+          
+          "carbon-black": "Microsoft Defender for Endpoint - Solución EDR enterprise integrada con Microsoft 365, análisis de comportamiento, threat & vulnerability management, y respuesta automatizada de investigación (AIR).",
+
+          // Identity & Access Management
+          "okta": "Okta Universal Directory - Plataforma de gestión de identidades líder con SSO, MFA adaptativo, aprovisionamiento automático de usuarios, governanza de acceso y integración con 7000+ aplicaciones.",
+          
+          "cyberark": "CyberArk Privileged Access Management - Solución líder para protección de cuentas privilegiadas con bóveda de credenciales, grabación de sesiones, análisis de comportamiento y acceso just-in-time.",
+          
+          "azure-ad": "Microsoft Entra ID (Azure AD) - Servicio de gestión de identidades cloud con conditional access, identity protection, PIM (Privileged Identity Management) y integración nativa con ecosistema Microsoft.",
+
+          // SIEM & Security Analytics
+          "splunk": "Splunk Enterprise Security - Plataforma SIEM/SOAR líder para análisis de big data de seguridad, correlación de eventos, machine learning para detección de anomalías y orquestación de respuesta automatizada.",
+          
+          "sentinel": "sistema de gestión de información y eventos de seguridad (SIEM) y de orquestación, automatización y respuesta de seguridad (SOAR) nativo de la nube que utiliza inteligencia artificial y análisis de comportamiento para ofrecer detección de amenazas, búsqueda proactiva y respuesta a incidentes",          
+          "qradar": "IBM QRadar SIEM - Plataforma de inteligencia de seguridad con análisis de comportamiento de usuarios (UBA), detección de amenazas con IA Watson, flow analysis y gestión centralizada de logs.",
+
+          // Threat Types (Educational)
+          "phishing": "Técnica de ingeniería social que utiliza emails, sitios web o mensajes fraudulentos para obtener información confidencial como credenciales, datos financieros o instalar malware. Evoluciona constantemente con spear phishing y whale phishing.",
+          
+          "malware": "Software malicioso que incluye virus, trojanos, ransomware, spyware y rootkits. Las variantes modernas utilizan técnicas de evasión avanzadas, cifrado, y comunicación C2 (Command & Control) para persistir en sistemas comprometidos."
+        };
+
+        const info =
+          toolInfo[toolName] || "Herramienta de seguridad enterprise";
+        showNotification(info, "info");
+      }
+
+      function incrementThreats() {
+        currentMetrics.threats++;
+        document.getElementById("threats-blocked").textContent =
+          currentMetrics.threats;
+      }
+
+      function updateMetrics(threats, responseTime, coverage, uptime) {
+        document.getElementById("threats-blocked").textContent = threats;
+        document.getElementById("response-time").textContent = responseTime;
+        document.getElementById("coverage").textContent = coverage;
+        document.getElementById("uptime").textContent = uptime;
+      }
+
+      function showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.classList.add("show");
+        }, 100);
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      function clearTimeouts() {
+        animationTimeouts.forEach(clearTimeout);
+        animationTimeouts = [];
+      }
+
+      function startMetricsUpdate() {
+        setInterval(() => {
+          const coverage = (99.7 + Math.random() * 0.3).toFixed(1) + "%";
+          const uptime = (99.95 + Math.random() * 0.05).toFixed(2) + "%";
+
+          document.getElementById("coverage").textContent = coverage;
+          document.getElementById("uptime").textContent = uptime;
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>
