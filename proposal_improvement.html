@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta de Mejoras en Políticas y Procesos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #f9fafb 0%, #f1f5f9 50%, #e2e8f0 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #7c3aed;
+            margin-bottom: 12px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+
+        .question-badge {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #7c3aed;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .subsection {
+            margin-bottom: 24px;
+        }
+
+        .subsection h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 12px;
+            border-left: 4px solid #dc2626;
+            padding-left: 12px;
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .subsection h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1d4ed8;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .improvement-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .improvement-item {
+            background: linear-gradient(135deg, #fefbff, #f8fafc);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .improvement-item:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .improvement-item::before {
+            content: "🎯";
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .improvement-item strong {
+            color: #1e293b;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .improvement-item em {
+            color: #64748b;
+            font-style: normal;
+            font-size: 0.9em;
+        }
+
+        .architecture-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #7c3aed;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 4px;
+            border: 1px solid #c4b5fd;
+        }
+
+        .priority-high {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 1px solid #ef4444;
+            color: #dc2626;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-medium {
+            background: linear-gradient(135deg, #fef3c7, #fed7aa);
+            border: 1px solid #f59e0b;
+            color: #ea580c;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 1px solid #22c55e;
+            color: #16a34a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .detail-section {
+            background: linear-gradient(135deg, #fafaf9, #f5f5f4);
+            border-left: 4px solid #7c3aed;
+            padding: 14px 18px;
+            margin: 12px 0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .business-case {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 1px solid #059669;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .business-case strong {
+            color: #047857;
+        }
+
+        .risk-mitigation {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .risk-mitigation strong {
+            color: #dc2626;
+        }
+
+        .implementation-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .implementation-box strong {
+            color: #1d4ed8;
+        }
+
+        .timeline {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            grid-column: 1 / -1;
+            margin-top: 24px;
+        }
+
+        .timeline-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #7c3aed;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .quarter-card {
+            background: linear-gradient(135deg, #fefbff, #f8fafc);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .quarter-card:hover {
+            border-color: #7c3aed;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.15);
+        }
+
+        .quarter-card.q1 { border-left: 4px solid #ef4444; }
+        .quarter-card.q2 { border-left: 4px solid #f59e0b; }
+        .quarter-card.q3 { border-left: 4px solid #3b82f6; }
+        .quarter-card.q4 { border-left: 4px solid #16a34a; }
+
+        .quarter-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .quarter-card.q1 .quarter-title { color: #ef4444; }
+        .quarter-card.q2 .quarter-title { color: #f59e0b; }
+        .quarter-card.q3 .quarter-title { color: #3b82f6; }
+        .quarter-card.q4 .quarter-title { color: #16a34a; }
+
+        .quarter-items {
+            list-style: none;
+            text-align: left;
+        }
+
+        .quarter-items li {
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .roi-section {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 2px solid #22c55e;
+            border-radius: 16px;
+            padding: 28px;
+            margin: 24px 0;
+        }
+
+        .roi-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .roi-card {
+            background: #ffffff;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .roi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #16a34a;
+            margin-bottom: 8px;
+        }
+
+        .roi-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .timeline-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .roi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Propuesta de Mejoras en Políticas y Procesos</h1>
+            <p>Propuesta Detallada de Mejoras Específicas en Seguridad</p>
+            <div class="question-badge">PREGUNTA 2 - Propuesta de Mejoras Detallada</div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="section-card full-width">
+            <div class="section-title">
+                <span class="section-icon">📋</span>
+                Executive Summary - Propuesta de Mejoras
+            </div>
+            
+            <div class="business-case">
+                <strong>Justificación Estratégica:</strong><br>
+                Esta propuesta aborda las brechas críticas identificadas en nuestro ecosistema de seguridad, 
+                enfocándose en modernizar políticas, automatizar procesos, y establecer un marco de 
+                governance que responda proactivamente a amenazas emergentes con un ROI proyectado del 320% en 24 meses.
+            </div>
+
+            <div class="risk-mitigation">
+                <strong>Riesgos Mitigados:</strong><br>
+                • Reducción de 85% en tiempo de exposición a amenazas<br>
+                • Eliminación de 70% de procesos manuales propensos a error<br>
+                • Mejora de 90% en cumplimiento normativo automatizado<br>
+                • Disminución de 60% en costos operacionales de seguridad
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Mejora A: Zero Trust Architecture 2.0 -->
+            <div class="section-card">
+                <div class="section-title">
+                    <span class="section-icon">🛡️</span>
+                    A. Zero Trust Architecture 2.0
+                </div>
+
+                <div class="subsection">
+                    <h3>Políticas de Identidad Mejoradas</h3>
+                    <ul class="improvement-list">
+                        <li class="improvement-item">
+                            <strong>Dynamic Identity Governance:</strong>
+                            <span class="priority-high">ALTA PRIORIDAD</span><br>
+                            <span class="architecture-tag">Okta Identity Governance</span>
+                            <span class="architecture-tag">Azure AD PIM</span>
+                            <span class="architecture-tag">SailPoint IdentityNow</span>
+                            <em>Implementación: Mes 1-2</em>
+                            <div class="detail-section">
+                                <strong>Mejoras Específicas:</strong><br>
+                                • Just-In-Time (JIT) Access con aprobación automática<br>
+                                • Risk-based conditional access policies<br>
+                                • Behavioral biometrics para continuous authentication<br>
+                                • Privileged access workflows con time-bounded permissions
+                            </div>
+                            <div class="business-case">
+                                <strong>Business Case:</strong> Reducción de 85% en privilegios excesivos, 
+                                eliminación de cuentas dormant en 30 días, mejora de audit compliance en 95%
+                            </div>
+                        </li>
+
+                        <li class="improvement-item">
+                            <strong>Adaptive Multi-Factor Authentication:</strong>
+                            <span class="priority-high">ALTA PRIORIDAD</span><br>
+                            <span class="architecture-tag">Microsoft Authenticator</span>
+                            <span class="architecture-tag">Duo Security</span>
+                            <em>Context-aware MFA con risk scoring</em>
+                            <div class="detail-section">
+                                <strong>Políticas Adaptativas:</strong><br>
+                                • Geolocation-based risk assessment<br>
+                                • Device trust scoring con certificate binding<br>
+                                • Behavioral pattern analysis para step-up authentication<br>
+                                • Passwordless authentication con FIDO2/WebAuthn
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Microsegmentación Inteligente</h3>
+                    <ul class="improvement-list">
+                        <li class="improvement-item">
+                            <strong>Software-Defined Perimeter (SDP):</strong>
+                            <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                            <span class="architecture-tag">Zscaler Private Access</span>
+                            <span class="architecture-tag">Palo Alto Prisma Access</span>
+                            <div class="implementation-box">
+                                <strong>Implementación Fásica:</strong><br>
+                                Fase 1: Critical assets (Mes 3)<br>
+                                Fase 2: Production environment (Mes 4)<br>
+                                Fase 3: Complete network (Mes 5-6)
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Mejora B: SOAR & Automation -->
+            <div class="section-card">
+                <div class="section-title">
+                    <span class="section-icon">🤖</span>
+                    B. SOAR & Automation Avanzada
+                </div>
+
+                <div class="subsection">
+                    <h3>Orchestration Inteligente</h3>
+                    <ul class="improvement-list">
+                        <li class="improvement-item">
+                            <strong>Context-Aware Playbook Engine:</strong>
+                            <span class="priority-high">ALTA PRIORIDAD</span><br>
+                            <span class="architecture-tag">Microsoft Sentinel SOAR</span>
+                            <span class="architecture-tag">Phantom SOAR</span>
+                            <span class="architecture-tag">Demisto</span>
+                            <div class="detail-section">
+                                <strong>Playbooks Inteligentes por Amenaza:</strong><br>
+                                • <strong>Ransomware:</strong> Isolation + backup validation + crypto-locker detection<br>
+                                • <strong>Phishing:</strong> Email quarantine + user training + domain reputation check<br>
+                                • <strong>Data Exfiltration:</strong> DLP enforcement + network isolation + forensics<br>
+                                • <strong>Supply Chain:</strong> Hash verification + vendor notification + IOC hunting<br>
+                                • <strong>Insider Threat:</strong> Privilege review + activity monitoring + HR notification
+                            </div>
+                            <div class="business-case">
+                                <strong>Impacto Operacional:</strong> Automatización de 90% de incidentes Tier 1, 
+                                reducción de MTTR de 4 horas a 15 minutos, liberación de 2000+ horas analista/año
+                            </div>
+                        </li>
+
+                        <li class="improvement-item">
+                            <strong>AI-Powered Decision Engine:</strong>
+                            <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                            <em>Machine learning para selección automática de response actions</em>
+                            <div class="detail-section">
+                                <strong>Algoritmos Implementados:</strong><br>
+                                • Threat severity scoring con ensemble methods<br>
+                                • Business impact assessment automatizado<br>
+                                • Confidence-based escalation workflows<br>
+                                • Historical outcome learning para optimization
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Threat Intelligence Automatizada</h3>
+                    <ul class="improvement-list">
+                        <li class="improvement-item">
+                            <strong>Proactive Threat Hunting Platform:</strong>
+                            <span class="priority-high">ALTA PRIORIDAD</span><br>
+                            <span class="architecture-tag">CrowdStrike Overwatch</span>
+                            <span class="architecture-tag">Carbon Black</span>
+                            <div class="implementation-box">
+                                <strong>Hunting Automation:</strong><br>
+                                • MITRE ATT&CK framework integration<br>
+                                • Hypothesis-driven hunting con ML<br>
+                                • IOC generation y attribution automática<br>
+                                • Threat landscape prediction modeling
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mejora C: Compliance & Governance -->
+        <div class="section-card full-width">
+            <div class="section-title">
+                <span class="section-icon">📊</span>
+                C. Compliance Automation & Governance
+            </div>
+
+            <div class="main-grid" style="margin-top: 0;">
+                <div>
+                    <div class="subsection">
+                        <h3>Automated Compliance Framework</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>Continuous Compliance Monitoring:</strong>
+                                <span class="priority-high">ALTA PRIORIDAD</span><br>
+                                <span class="architecture-tag">ServiceNow IRM</span>
+                                <span class="architecture-tag">MetricStream</span>
+                                <div class="detail-section">
+                                    <strong>ISO 27001 Automation:</strong><br>
+                                    • Real-time control effectiveness monitoring<br>
+                                    • Automated evidence collection y archival<br>
+                                    • Gap analysis con remediation workflows<br>
+                                    • Continuous risk assessment scoring
+                                </div>
+                                <div class="business-case">
+                                    <strong>ROI:</strong> Reducción de 60% en tiempo de auditoría, 
+                                    90% menos effort en evidence collection, compliance score >95%
+                                </div>
+                            </li>
+
+                            <li class="improvement-item">
+                                <strong>SOX IT Controls Automation:</strong>
+                                <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                                <span class="architecture-tag">CyberArk PAM</span>
+                                <span class="architecture-tag">Saviynt</span>
+                                <div class="detail-section">
+                                    • Automated segregation of duties validation<br>
+                                    • Change management workflow integration<br>
+                                    • Privileged access review automation<br>
+                                    • Immutable audit trails con blockchain
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="subsection">
+                        <h3>Data Protection & Privacy</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>Privacy by Design Framework:</strong>
+                                <span class="priority-high">ALTA PRIORIDAD</span><br>
+                                <span class="architecture-tag">Microsoft Purview</span>
+                                <span class="architecture-tag">Varonis</span>
+                                <div class="detail-section">
+                                    <strong>GDPR Automation:</strong><br>
+                                    • Automated data discovery y classification<br>
+                                    • Subject rights request (DSAR) automation<br>
+                                    • Consent management integration<br>
+                                    • Breach notification automation (72h compliance)
+                                </div>
+                            </li>
+
+                            <li class="improvement-item">
+                                <strong>PCI DSS Tokenization Enhanced:</strong>
+                                <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                                <span class="architecture-tag">Azure Key Vault HSM</span>
+                                <div class="business-case">
+                                    <strong>Scope Reduction:</strong> 90% reducción en PCI scope, 
+                                    eliminación de 15+ sistemas de audit scope
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mejora D: Advanced Analytics -->
+        <div class="section-card full-width">
+            <div class="section-title">
+                <span class="section-icon">📈</span>
+                D. Advanced Analytics & Intelligence
+            </div>
+
+            <div class="main-grid" style="margin-top: 0;">
+                <div>
+                    <div class="subsection">
+                        <h3>Predictive Security Analytics</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>AI-Driven Risk Prediction:</strong>
+                                <span class="priority-high">ALTA PRIORIDAD</span><br>
+                                <span class="architecture-tag">IBM QRadar Advisor</span>
+                                <span class="architecture-tag">Splunk ML Toolkit</span>
+                                <div class="detail-section">
+                                    • Threat landscape forecasting<br>
+                                    • Vulnerability exploitation prediction<br>
+                                    • Attack path analysis automatizada<br>
+                                    • Risk score trending y alerting
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Business Risk Integration</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>Cyber Risk Quantification:</strong>
+                                <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                                <span class="architecture-tag">RiskLens FAIR</span>
+                                <div class="business-case">
+                                    <strong>Business Value:</strong> Traducción de cyber risk a financial impact, 
+                                    ROI-driven security investments, board-level risk communication
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="subsection">
+                        <h3>Dark Web & External Monitoring</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>Comprehensive External Monitoring:</strong>
+                                <span class="priority-low">BAJA PRIORIDAD</span><br>
+                                <span class="architecture-tag">Digital Shadows</span>
+                                <span class="architecture-tag">Recorded Future</span>
+                                <div class="detail-section">
+                                    • Dark web credential leak monitoring<br>
+                                    • Brand reputation y typosquatting detection<br>
+                                    • Executive protection monitoring<br>
+                                    • Supply chain risk intelligence
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Third-Party Risk Management</h3>
+                        <ul class="improvement-list">
+                            <li class="improvement-item">
+                                <strong>Vendor Risk Automation:</strong>
+                                <span class="priority-medium">MEDIA PRIORIDAD</span><br>
+                                <span class="architecture-tag">BitSight</span>
+                                <span class="architecture-tag">SecurityScorecard</span>
+                                <div class="detail-section">
+                                    • Continuous vendor security rating<br>
+                                    • Automated questionnaire processing<br>
+                                    • Supply chain risk scoring<br>
+                                    • Contract risk clause automation
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline de Implementación -->
+        <div class="timeline">
+            <div class="timeline-title">Roadmap de Implementación - 12 Meses</div>
+            <div class="timeline-grid">
+                <div class="quarter-card q1">
+                    <div class="quarter-title">Q1: Foundation</div>
+                    <ul class="quarter-items">
+                        <li><strong>Zero Trust Identity (A1)</strong> - JIT Access deployment</li>
+                        <li><strong>SOAR Playbooks (B1)</strong> - Top 5 threat scenarios</li>
+                        <li><strong>Compliance Automation (C1)</strong> - ISO 27001 controls</li>
+                        <li><strong>Baseline Analytics (D1)</strong> - Risk prediction models</li>
+                        <li><strong>Stakeholder Training</strong> - New process adoption</li>
+                        <li><strong>Pilot Environment</strong> - Limited scope validation</li>
+                    </ul>
+                </div>
+                
+                <div class="quarter-card q2">
+                    <div class="quarter-title">Q2: Expansion</div>
+                    <ul class="quarter-items">
+                        <li><strong>Microsegmentation (A2)</strong> - Critical assets first</li>
+                        <li><strong>AI Decision Engine (B2)</strong> - ML-driven responses</li>
+                        <li><strong>SOX Automation (C2)</strong> - IT controls workflow</li>
+                        <li><strong>Threat Hunting (D2)</strong> - Proactive hunting platform</li>
+                        <li><strong>Performance Optimization</strong> - Tuning y refinement</li>
+                        <li><strong>User Acceptance Testing</strong> - Full functionality</li>
+                    </ul>
+                </div>
+                
+                <div class="quarter-card q3">
+                    <div class="quarter-title">Q3: Integration</div>
+                    <ul class="quarter-items">
+                        <li><strong>Complete Zero Trust (A3)</strong> - Network-wide deployment</li>
+                        <li><strong>Advanced Analytics (B3)</strong> - Predictive capabilities</li>
+                        <li><strong>GDPR Automation (C3)</strong> - Privacy by design</li>
+                        <li><strong>External Monitoring (D3)</strong> - Dark web y brand protection</li>
+                        <li><strong>Cross-Platform Integration</strong> - API orchestration</li>
+                        <li><strong>Compliance Validation</strong> - Full audit readiness</li>
+                    </ul>
+                </div>
+                
+                <div class="quarter-card q4">
+                    <div class="quarter-title">Q4: Optimization</div>
+                    <ul class="quarter-items">
+                        <li><strong>Continuous Improvement</strong> - Self-optimizing systems</li>
+                        <li><strong>Advanced Threat Simulation</strong> - Red team exercises</li>
+                        <li><strong>Third-Party Risk (D4)</strong> - Vendor risk automation</li>
+                        <li><strong>Business Risk Integration</strong> - Financial impact modeling</li>
+                        <li><strong>External Benchmarking</strong> - Industry comparison</li>
+                        <li><strong>Next-Gen Planning</strong> - Future roadmap development</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROI y Business Case -->
+        <div class="roi-section">
+            <div class="roi-title">ROI y Business Case - Proyección 24 Meses</div>
+            <div class="roi-grid">
+                <div class="roi-card">
+                    <div class="roi-value">320%</div>
+                    <div class="roi-label">ROI Total Proyectado</div>
+                </div>
+                <div class="roi-card">
+                    <div class="roi-value">$4.2M</div>
+                    <div class="roi-label">Cost Avoidance Anual</div>
+                </div>
+                <div class="roi-card">
+                    <div class="roi-value">85%</div>
+                    <div class="roi-label">Reducción Tiempo Exposición</div>
+                </div>
+                <div class="roi-card">
+                    <div class="roi-value">70%</div>
+                    <div class="roi-label">Procesos Automatizados</div>
+                </div>
+                <div class="roi-card">
+                    <div class="roi-value">2,500h</div>
+                    <div class="roi-label">Horas Analyst Liberadas/Año</div>
+                </div>
+                <div class="roi-card">
+                    <div class="roi-value">< 10min</div>
+                    <div class="roi-label">MTTR Promedio Post-Mejoras</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

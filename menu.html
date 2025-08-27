@@ -158,8 +158,7 @@
         color: #374151;
         font-size: 0.9rem;
       }
-
-      /* ==== ACCESO RÁPIDO ==== */
+ 
       /* ==== ACCESO RÁPIDO ==== */
       .quick-access {
         background: #ffffff;
@@ -205,8 +204,11 @@
       .quick-btn.danger {
         background: linear-gradient(135deg, #ef4444, #dc2626);
       }
+      .quick-btn.warning {
+        background: linear-gradient(135deg, #6c7078, #6b7280);
+      }
       .quick-btn.success {
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: linear-gradient(135deg, #b2d3b6, #cfe2d1);
       }
 
       /* ==== INDICADORES ==== */
@@ -282,10 +284,13 @@
           </button>
           <button class="quick-btn success" onclick="viewArchitecture()">
             🏗️ Ver Arquitectura
-          </button> 
-          <button class="quick-btn" onclick="viewPresentation()">
+          </button>
+          <button class="quick-btn " onclick="viewPresentation()">
             🎥 Representación
           </button>
+          <button class="quick-btn warning" onclick="updateSecurity()">
+            📄 Propuesta mejora
+          </button> 
         </div>
       </div>
       <!-- TIMELINE -->
@@ -322,7 +327,7 @@
           </div>
         </div>
       </div>
-       
+
       <!-- INDICADORES -->
       <div class="status-indicators">
         <div class="status-card">
@@ -351,7 +356,8 @@
         analysis: "technical_analysis.html",
         mitigation: "attack_remediation.html",
         implementation: "implementation_plan.html",
-        lessons: "lessons_learned.html",
+        updateSecurity: "update_states.html",
+        proposal_improvement: "proposal_improvement.html",
       };
 
       function loadSection(sectionId) {
@@ -387,8 +393,14 @@
         showNotification("Abriendo arquitectura...", "info");
         window.open(sections.architecture, "_blank");
       }
-      function downloadReport() {
-        showNotification("Preparando reporte...", "info");
+      function updateSecurity() {
+        showNotification("Preparando mejoras...", "info");
+        window.open(sections.updateSecurity, "_blank");
+      }
+      
+      function proposal_improvement() {
+        showNotification("Preparando mejoras...", "info");
+        window.open(sections.proposal_improvement, "_blank");
       }
       function viewPresentation() {
         showNotification("Abriendo representación...", "info");
