@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ataque Cibernético - Banco XYZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* CAPAS ORGANIZACIONALES */
+        .org-layer {
+            position: absolute;
+            width: 100%;
+            border-bottom: 2px dashed #ddd;
+            padding: 10px 0;
+        }
+
+        .layer-label {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #495057;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .internet-layer { top: 80px; height: 120px; background: rgba(255, 107, 107, 0.05); }
+        .perimeter-layer { top: 200px; height: 100px; background: rgba(255, 152, 0, 0.05); }
+        .dmz-layer { top: 300px; height: 120px; background: rgba(76, 175, 80, 0.05); }
+        .internal-layer { top: 420px; height: 140px; background: rgba(33, 150, 243, 0.05); }
+        .critical-layer { top: 560px; height: 120px; background: rgba(156, 39, 176, 0.05); }
+
+        /* DISPOSITIVOS Y SISTEMAS */
+        .device {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .device:hover {
+            transform: scale(1.05);
+        }
+
+        .computer, .server, .firewall, .router {
+            width: 60px;
+            height: 70px;
+            position: relative;
+        }
+
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto;
+            background: #fff;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .device-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4CAF50;
+            border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+
+        .compromised { background: #f44336 !important; animation: dangerPulse 1s infinite; }
+        .warning { background: #ff9800 !important; animation: warningPulse 1.5s infinite; }
+        .encrypted { background: #e91e63 !important; animation: encryptedPulse 0.8s infinite; }
+
+        /* POSICIONES ESPECÍFICAS */
+        .attacker { top: 100px; left: 100px; }
+        .email-server { top: 120px; right: 150px; }
+        .firewall-main { top: 230px; left: 300px; }
+        .proxy-server { top: 240px; right: 200px; }
+        .web-server { top: 330px; left: 200px; }
+        .app-server { top: 340px; right: 300px; }
+        .employee-pc { top: 450px; left: 150px; }
+        .admin-workstation { top: 460px; left: 400px; }
+        .file-server { top: 470px; right: 200px; }
+        .database-server { top: 580px; left: 250px; }
+        .backup-server { top: 590px; right: 180px; }
+        .core-banking { top: 600px; left: 500px; }
+
+        /* CONEXIONES */
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: #ccc;
+            transform-origin: left center;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+
+        .connection-active { 
+            opacity: 0.6; 
+            animation: dataFlow 2s infinite;
+        }
+
+        .connection-attack { 
+            background: #f44336; 
+            opacity: 1; 
+            animation: attackFlow 1s infinite;
+            box-shadow: 0 0 10px #f44336;
+        }
+
+        .connection-lateral { 
+            background: #ff9800; 
+            opacity: 0.8; 
+            animation: lateralFlow 1.5s infinite;
+            box-shadow: 0 0 8px #ff9800;
+        }
+
+        .connection-encrypted { 
+            background: #e91e63; 
+            opacity: 1; 
+            animation: encryptFlow 0.8s infinite;
+            box-shadow: 0 0 12px #e91e63;
+        }
+
+        /* EMAIL DE PHISHING */
+        .phishing-email {
+            position: absolute;
+            top: 200px;
+            left: 200px;
+            width: 350px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-left: 5px solid #2196F3;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            z-index: 100;
+        }
+
+        .email-show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .email-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .email-from {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .email-subject {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #1976D2;
+        }
+
+        .email-body {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .malicious-link {
+            color: #f44336;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+            background: rgba(244, 67, 54, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* ALERTAS Y NOTIFICACIONES */
+        .alert-panel {
+            position: absolute;
+            top: 120px;
+            right: 30px;
+            width: 380px;
+            max-height: 500px;
+            overflow-y: auto;
+            z-index: 200;
+        }
+
+        .alert {
+            background: #fff;
+            border-left: 5px solid #f44336;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.5s ease;
+        }
+
+        .alert-show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #f44336;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .alert-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* PANEL DE IMPACTO */
+        .impact-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 300;
+        }
+
+        .impact-show {
+            opacity: 1;
+        }
+
+        .impact-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .impact-stat {
+            text-align: center;
+        }
+
+        .impact-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .impact-label {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        /* CONTROLES */
+        .controls {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .btn {
+            background: #495057;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #343a40;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .phase-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            z-index: 300;
+        }
+
+        /* ANIMACIONES */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        @keyframes dangerPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(255, 152, 0, 0); }
+        }
+
+        @keyframes encryptedPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(233, 30, 99, 0); }
+        }
+
+        @keyframes dataFlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes attackFlow {
+            0%, 100% { opacity: 0.8; box-shadow: 0 0 5px #f44336; }
+            50% { opacity: 1; box-shadow: 0 0 15px #f44336; }
+        }
+
+        @keyframes lateralFlow {
+            0%, 100% { opacity: 0.6; box-shadow: 0 0 5px #ff9800; }
+            50% { opacity: 1; box-shadow: 0 0 12px #ff9800; }
+        }
+
+        @keyframes encryptFlow {
+            0%, 100% { opacity: 0.8; box-shadow: 0 0 8px #e91e63; }
+            50% { opacity: 1; box-shadow: 0 0 20px #e91e63; }
+        }
+
+        .timeline-counter {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 1rem;
+            z-index: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 BCP - Análisis de Incidente de Seguridad</h1>
+            <p>Simulación del Ataque Spearphishing Link y Remote Services - Caso Real</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="startAttack()">▶️ Iniciar</button>
+            <button class="btn" onclick="pauseAttack()">⏸️ Pausar</button>
+            <button class="btn btn-danger" onclick="resetAttack()">🔄 Reset</button>
+        </div>
+
+        <div class="timeline-counter" id="timeline">
+            ⏱️ T+00:00:00
+        </div>
+
+        <!-- CAPAS ORGANIZACIONALES -->
+        <div class="org-layer internet-layer">
+            <div class="layer-label">🌐 Internet / Atacantes Externos</div>
+        </div>
+        
+        <div class="org-layer perimeter-layer">
+            <div class="layer-label">🛡️ Perímetro de Seguridad</div>
+        </div>
+        
+        <div class="org-layer dmz-layer">
+            <div class="layer-label">🔒 DMZ / Servicios Públicos</div>
+        </div>
+        
+        <div class="org-layer internal-layer">
+            <div class="layer-label">💼 Red Interna / Usuarios</div>
+        </div>
+        
+        <div class="org-layer critical-layer">
+            <div class="layer-label">⚡ Sistemas Críticos / Core Banking</div>
+        </div>
+
+        <!-- DISPOSITIVOS Y SISTEMAS -->
+        
+        <!-- Internet Layer -->
+        <div class="device attacker">
+            <div class="device-icon">🔴</div>
+            <div class="status-indicator compromised" id="attacker-status"></div>
+            <div class="device-label">C&C Server</div>
+        </div>
+
+        <div class="device email-server">
+            <div class="device-icon">📧</div>
+            <div class="status-indicator" id="email-status"></div>
+            <div class="device-label">Mail Gateway</div>
+        </div>
+
+        <!-- Perimeter Layer -->
+        <div class="device firewall-main">
+            <div class="device-icon">🛡️</div>
+            <div class="status-indicator" id="firewall-status"></div>
+            <div class="device-label">Firewall Principal</div>
+        </div>
+
+        <div class="device proxy-server">
+            <div class="device-icon">🔄</div>
+            <div class="status-indicator" id="proxy-status"></div>
+            <div class="device-label">Proxy Server</div>
+        </div>
+
+        <!-- DMZ Layer -->
+        <div class="device web-server">
+            <div class="device-icon">🌐</div>
+            <div class="status-indicator" id="web-status"></div>
+            <div class="device-label">Web Server</div>
+        </div>
+
+        <div class="device app-server">
+            <div class="device-icon">⚙️</div>
+            <div class="status-indicator" id="app-status"></div>
+            <div class="device-label">App Server</div>
+        </div>
+
+        <!-- Internal Layer -->
+        <div class="device employee-pc">
+            <div class="device-icon">👤</div>
+            <div class="status-indicator" id="employee-status"></div>
+            <div class="device-label">PC María González</div>
+        </div>
+
+        <div class="device admin-workstation">
+            <div class="device-icon">👨‍💼</div>
+            <div class="status-indicator" id="admin-status"></div>
+            <div class="device-label">Admin Workstation</div>
+        </div>
+
+        <div class="device file-server">
+            <div class="device-icon">📁</div>
+            <div class="status-indicator" id="file-status"></div>
+            <div class="device-label">File Server</div>
+        </div>
+
+        <!-- Critical Layer -->
+        <div class="device database-server">
+            <div class="device-icon">🗄️</div>
+            <div class="status-indicator" id="db-status"></div>
+            <div class="device-label">Database Server</div>
+        </div>
+
+        <div class="device backup-server">
+            <div class="device-icon">💾</div>
+            <div class="status-indicator" id="backup-status"></div>
+            <div class="device-label">Backup Server</div>
+        </div>
+
+        <div class="device core-banking">
+            <div class="device-icon">🏦</div>
+            <div class="status-indicator" id="core-status"></div>
+            <div class="device-label">Core Banking</div>
+        </div>
+
+        <!-- CONEXIONES -->
+        <div class="connection" id="conn1"></div>
+        <div class="connection" id="conn2"></div>
+        <div class="connection" id="conn3"></div>
+        <div class="connection" id="conn4"></div>
+        <div class="connection" id="conn5"></div>
+        <div class="connection" id="conn6"></div>
+        <div class="connection" id="conn7"></div>
+        <div class="connection" id="conn8"></div>
+        <div class="connection" id="conn9"></div>
+        <div class="connection" id="conn10"></div>
+
+        <!-- EMAIL DE PHISHING -->
+        <div class="phishing-email" id="phishing-email">
+            <div class="email-header">
+                <div style="margin-right: 15px;">📧</div>
+                <div>
+                    <div class="email-from">soporte-urgente@bancoxyz-seguridad.com</div>
+                    <div style="font-size: 0.8rem; color: #999;">hace 1 minuto • Prioridad: ALTA</div>
+                </div>
+            </div>
+            <div class="email-subject">🚨 ACCIÓN REQUERIDA: Verificación de Seguridad</div>
+            <div class="email-body">
+                Estimado/a colaborador/a del área financiera,<br><br>
+                
+                Hemos detectado <strong>actividad sospechosa</strong> en los sistemas bancarios que requiere su <strong>verificación inmediata</strong>.<br><br>
+                
+                <strong style="color: #f44336;">URGENTE:</strong> Por motivos de seguridad, debe validar sus credenciales en las próximas 2 horas o su acceso será suspendido temporalmente.<br><br>
+                
+                👆 <span class="malicious-link" onclick="triggerInfection()">VERIFICAR CREDENCIALES DE ACCESO</span><br><br>
+                
+                Este enlace es confidencial y de uso único.<br>
+                No reenvíe este mensaje por seguridad.<br><br>
+                
+                Atentamente,<br>
+                <strong>Dpto. de Seguridad Informática</strong><br>
+                BCP - Banco de Crédito del Perú
+            </div>
+        </div>
+
+        <!-- PANEL DE ALERTAS -->
+        <div class="alert-panel" id="alert-panel"></div>
+
+        <!-- PANEL DE IMPACTO -->
+        <div class="impact-panel" id="impact-panel">
+            <div style="font-size: 1.2rem; font-weight: bold; color: #ff6b6b;">⚠️ IMPACTO CRÍTICO DEL ATAQUE BCP</div>
+            <div class="impact-stats">
+                <div class="impact-stat">
+                    <div class="impact-number" id="files-encrypted">15,847</div>
+                    <div class="impact-label">Archivos Cifrados</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number">Millones $</div>
+                    <div class="impact-label">Pérdidas Estimadas</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number" id="downtime">72:15:33</div>
+                    <div class="impact-label">Tiempo Inactividad</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number">9/10</div>
+                    <div class="impact-label">Sistemas Críticos</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; font-size: 0.9rem;">
+                <strong>Técnicas MITRE ATT&CK identificadas:</strong><br>
+                • Spearphishing Link (T1566.002)<br>
+                • Valid Accounts (T1078) <br>
+                • Remote Services (T1021)<br>
+                • Exploitation for Privilege Escalation (T1068)<br>
+                • Data Encrypted for Impact (T1486)
+            </div>
+        </div>
+
+        <div class="phase-indicator" id="phase-indicator">
+            🎯 Preparando simulación...
+        </div>
+    </div>
+
+    <script>
+        let attackRunning = false;
+        let timeouts = [];
+        let startTime = 0;
+        let currentPhase = 0;
+        let encryptedFiles = 0;
+        let timerInterval = null;
+
+        const phases = [
+            "📧 Fase 1: Spearphishing Link - Email malicioso enviado",
+            "🎣 Fase 2: Empleado engañado - Click en enlace malicioso", 
+            "🔓 Fase 3: Credenciales comprometidas - Acceso inicial obtenido",
+            "📡 Fase 4: Valid Accounts - Movimiento lateral iniciado",
+            "🦠 Fase 5: Remote Services - Propagación del ransomware",
+            "⚡ Fase 6: Exploitation for Privilege Escalation - Escalación",
+            "💾 Fase 7: Data Encrypted for Impact - Cifrando datos críticos",
+            "🌐 Fase 8: Vulnerabilidades en configuración de nube IAM",
+            "🔒 Fase 9: Sistemas clave y BD comprometidos",
+            "🚨 Fase 10: Detección de anomalías en tráfico de red",
+            "🔍 Fase 11: Investigación forense - Análisis de impacto",
+            "💰 Fase 12: Evaluación de pérdidas millonarias"
+        ];
+
+        const alerts = [
+            { time: "T+00:03:15", title: "Email Spearphishing Detectado", details: "Enlace malicioso enviado a empleado del área financiera", severity: "warning" },
+            { time: "T+00:08:42", title: "Credenciales Comprometidas", details: "Técnica Valid Accounts - Acceso no autorizado detectado", severity: "danger" },
+            { time: "T+00:15:33", title: "Remote Services Activado", details: "Propagación lateral via servicios remotos comprometidos", severity: "danger" },
+            { time: "T+00:23:17", title: "Privilege Escalation", details: "Explotación de vulnerabilidades para escalación de privilegios", severity: "critical" },
+            { time: "T+00:31:45", title: "Data Encrypted for Impact", details: "Ransomware cifrando datos sensibles y sistemas clave", severity: "critical" },
+            { time: "T+00:42:18", title: "Vulnerabilidad IAM Nube", details: "Configuración insegura en gestión de identidades explotada", severity: "critical" },
+            { time: "T+00:48:33", title: "Core Banking Comprometido", details: "Sistemas críticos fuera de línea - Impacto financiero severo", severity: "critical" },
+            { time: "T+01:15:27", title: "Investigación Forense", details: "Análisis de vectores de ataque y evaluación de daños", severity: "warning" }
+        ];
+
+        function updatePhase(phase) {
+            document.getElementById('phase-indicator').textContent = phases[phase] || phases[phases.length - 1];
+        }
+
+        function updateTimer() {
+            if (attackRunning && startTime) {
+                const elapsed = Date.now() - startTime;
+                const hours = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+                const minutes = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+                const seconds = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById('timeline').textContent = `⏱️ T+${hours}:${minutes}:${seconds}`;
+            }
+        }
+
+        function showAlert(alertData) {
+            const alertPanel = document.getElementById('alert-panel');
+            const alert = document.createElement('div');
+            alert.className = 'alert';
+            
+            const severityIcon = {
+                'warning': '⚠️',
+                'danger': '🔥', 
+                'critical': '🚨'
+            };
+
+            alert.innerHTML = `
+                <div class="alert-title">
+                    ${severityIcon[alertData.severity]} ${alertData.title}
+                </div>
+                <div class="alert-time">${alertData.time}</div>
+                <div class="alert-details">${alertData.details}</div>
+            `;
+            
+            alertPanel.appendChild(alert);
+            setTimeout(() => alert.classList.add('alert-show'), 100);
+        }
+
+        function updateStatus(deviceId, status) {
+            const device = document.getElementById(deviceId);
+            if (device) {
+                device.classList.remove('compromised', 'warning', 'encrypted');
+                if (status) device.classList.add(status);
+            }
+        }
+
+        function activateConnection(connId, type = 'connection-active') {
+            const conn = document.getElementById(connId);
+            if (conn) {
+                conn.classList.remove('connection-active', 'connection-attack', 'connection-lateral', 'connection-encrypted');
+                conn.classList.add(type);
+            }
+        }
+
+        function calculateConnections() {
+            // Set basic connection visibility
+            for(let i = 1; i <= 10; i++) {
+                const element = document.getElementById(`conn${i}`);
+                if (element) {
+                    element.style.opacity = '0.2';
+                    element.style.width = '100px';
+                    element.style.left = `${200 + i * 50}px`;
+                    element.style.top = `${200 + i * 30}px`;
+                }
+            }
+        }
+
+        function triggerInfection() {
+            if (!attackRunning) return;
+            
+            // Hide email
+            document.getElementById('phishing-email').classList.remove('email-show');
+            
+            // Store all timeouts to allow pausing
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 1;
+                updatePhase(currentPhase);
+                updateStatus('employee-status', 'warning');
+                activateConnection('conn3', 'connection-attack');
+            }, 1000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 2;
+                updatePhase(currentPhase);
+                updateStatus('employee-status', 'compromised');
+                showAlert(alerts[0]);
+            }, 3000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 3;
+                updatePhase(currentPhase);
+                activateConnection('conn1', 'connection-attack');
+                showAlert(alerts[1]);
+            }, 6000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 4;
+                updatePhase(currentPhase);
+                updateStatus('proxy-status', 'warning');
+            }, 8000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 5;
+                updatePhase(currentPhase);
+                activateConnection('conn4', 'connection-lateral');
+                updateStatus('file-status', 'warning');
+                showAlert(alerts[2]);
+            }, 11000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 6;
+                updatePhase(currentPhase);
+                activateConnection('conn5', 'connection-lateral');
+                updateStatus('app-status', 'compromised');
+                updateStatus('file-status', 'compromised');
+            }, 14000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 7;
+                updatePhase(currentPhase);
+                updateStatus('web-status', 'warning');
+                activateConnection('conn6', 'connection-attack');
+            }, 17000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 8;
+                updatePhase(currentPhase);
+                updateStatus('db-status', 'encrypted');
+                activateConnection('conn8', 'connection-encrypted');
+                showAlert(alerts[3]);
+                startEncryptionCounter();
+            }, 20000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 9;
+                updatePhase(currentPhase);
+                updateStatus('backup-status', 'encrypted');
+                updateStatus('core-status', 'encrypted');
+                activateConnection('conn7', 'connection-encrypted');
+                activateConnection('conn10', 'connection-encrypted');
+                showAlert(alerts[4]);
+                showAlert(alerts[5]);
+            }, 23000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 10;
+                updatePhase(currentPhase);
+                updateStatus('admin-status', 'warning');
+                activateConnection('conn9', 'connection-active');
+                showAlert(alerts[6]);
+            }, 26000));
+
+            timeouts.push(setTimeout(() => {
+                if (!attackRunning) return;
+                currentPhase = 11;
+                updatePhase(currentPhase);
+                document.getElementById('impact-panel').classList.add('impact-show');
+                showAlert(alerts[7]);
+            }, 29000));
+        }
+
+        function startEncryptionCounter() {
+            const counter = setInterval(() => {
+                if (attackRunning && encryptedFiles < 5000) {
+                    encryptedFiles += Math.floor(Math.random() * 50) + 10;
+                    document.getElementById('files-encrypted').textContent = encryptedFiles.toLocaleString();
+                } else {
+                    clearInterval(counter);
+                }
+            }, 500);
+        }
+
+        function startAttack() {
+            if (attackRunning) return;
+            
+            attackRunning = true;
+            startTime = Date.now();
+            currentPhase = 0;
+            encryptedFiles = 0;
+            
+            // Clear any existing timer
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // Show initial email
+            setTimeout(() => {
+                updatePhase(0);
+                document.getElementById('phishing-email').classList.add('email-show');
+            }, 1000);
+            
+            // Auto-trigger after 4 seconds if user doesn't click
+            timeouts.push(setTimeout(() => {
+                if (attackRunning) triggerInfection();
+            }, 4000));
+            
+            // Start timer
+            timerInterval = setInterval(() => {
+                updateTimer();
+                if (!attackRunning) clearInterval(timerInterval);
+            }, 1000);
+        }
+
+        function pauseAttack() {
+            attackRunning = false;
+            timeouts.forEach(timeout => clearTimeout(timeout));
+            timeouts = [];
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetAttack() {
+            pauseAttack();
+            
+            // Reset all device statuses
+            ['attacker-status', 'email-status', 'firewall-status', 'proxy-status', 'web-status', 
+             'app-status', 'employee-status', 'admin-status', 'file-status', 'db-status', 
+             'backup-status', 'core-status'].forEach(id => {
+                updateStatus(id, '');
+            });
+            
+            // Reset connections
+            for(let i = 1; i <= 10; i++) {
+                const conn = document.getElementById(`conn${i}`);
+                if (conn) {
+                    conn.classList.remove('connection-active', 'connection-attack', 'connection-lateral', 'connection-encrypted');
+                }
+            }
+            
+            // Hide notifications
+            document.getElementById('phishing-email').classList.remove('email-show');
+            document.getElementById('impact-panel').classList.remove('impact-show');
+            document.getElementById('alert-panel').innerHTML = '';
+            
+            // Reset counters
+            document.getElementById('timeline').textContent = '⏱️ T+00:00:00';
+            document.getElementById('files-encrypted').textContent = '0';
+            
+            // Reset phase
+            updatePhase(0);
+            currentPhase = 0;
+            startTime = 0;
+            encryptedFiles = 0;
+            
+            // Reset attacker status to show it's always compromised
+            setTimeout(() => {
+                updateStatus('attacker-status', 'compromised');
+            }, 100);
+        }
+
+        // Initialize on window load
+        window.addEventListener('load', () => {
+            calculateConnections();
+            updateStatus('attacker-status', 'compromised');
+            updatePhase(0);
+            
+            // Auto-start after 3 seconds
+            setTimeout(() => {
+                startAttack();
+            }, 3000);
+        });
+
+        // Add hover effects for devices
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.device').forEach(device => {
+                device.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.1)';
+                    this.style.zIndex = '50';
+                });
+                
+                device.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.zIndex = '10';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

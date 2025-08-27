@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solución de Seguridad Best-of-Breed - BCP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; overflow: hidden; }
+        .container { width: 100vw; height: 100vh; position: relative; background: linear-gradient(135deg, #eef2f7 0%, #dce9f5 100%); }
+        .header {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 1000;
+            background: rgba(255, 255, 255, 0.98); padding: 10px 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 1.5rem; color: #0033a0; }
+        .header p { color: #555; font-size: 0.9rem; }
+        /* CAPAS DE SEGURIDAD */
+        .security-layer { position: absolute; width: 100%; border-bottom: 2px dashed #b0c4de; }
+        .layer-label {
+            position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.95);
+            padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; color: #1c3d5a;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-left: 4px solid #0056b3;
+        }
+        .layer-perimeter { top: 70px; height: 110px; background: rgba(231, 76, 60, 0.03); }
+        .layer-endpoint { top: 180px; height: 120px; background: rgba(52, 152, 219, 0.05); }
+        .layer-identity { top: 300px; height: 150px; background: rgba(155, 89, 182, 0.05); }
+        .layer-network { top: 450px; height: 140px; background: rgba(243, 156, 18, 0.05); }
+        .layer-xdr { top: 590px; height: 130px; background: rgba(46, 204, 113, 0.05); }
+
+        /* COMPONENTES */
+        .component { position: absolute; cursor: pointer; transition: all 0.3s ease; z-index: 10; }
+        .component:hover { transform: scale(1.05); }
+        .component-icon {
+            width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin: 0 auto; background: #fff; border: 2px solid #ccc; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .component-label {
+            position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.98);
+            padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: #333; white-space: nowrap; box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%;
+            background: #2ecc71; border: 2px solid #fff; animation: pulse-ok 2s infinite;
+        }
+        .compromised { background: #e74c3c !important; animation: pulse-danger 1s infinite; }
+        .detected { background: #3498db !important; animation: pulse-detected 1.2s infinite; }
+        .contained { background: #9b59b6 !important; animation: pulse-contained 1.5s infinite; }
+
+        /* POSICIONES */
+        .attacker { top: 95px; left: 100px; }
+        .ms-defender-o365 { top: 95px; right: 150px; }
+        .employee-pc { top: 210px; left: 20%; }
+        .netskope-sse { top: 210px; left: 50%; transform: translateX(-50%); }
+        .entra-id { top: 340px; left: 35%; }
+        .palo-alto-fw { top: 480px; left: 50%; transform: translateX(-50%); }
+        .critical-server { top: 480px; right: 20%; }
+        .ms-sentinel { top: 620px; left: 50%; transform: translateX(-50%); }
+
+        /* CONEXIONES */
+        .connection { position: absolute; height: 3px; background: #bdc3c7; transform-origin: left center; opacity: 0; transition: all 0.5s ease; z-index: 1; }
+        .connection-attack { background: #e74c3c; opacity: 1; animation: flow-attack 1s infinite linear; box-shadow: 0 0 10px #e74c3c; }
+        .connection-blocked { background: repeating-linear-gradient(45deg, #e74c3c, #e74c3c 10px, #f8f9fa 10px, #f8f9fa 20px); opacity: 1; animation: flow-blocked 1.5s infinite linear; }
+        
+        /* PANEL DE ALERTAS */
+        .alert-panel { position: absolute; top: 90px; right: 20px; width: 400px; max-height: calc(100vh - 120px); overflow-y: auto; z-index: 200; }
+        .alert { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); opacity: 0; transform: translateX(50px); transition: all 0.5s ease; }
+        .alert-show { opacity: 1; transform: translateX(0); }
+        .alert.info { border-left: 5px solid #3498db; }
+        .alert.warning { border-left: 5px solid #f39c12; }
+        .alert.danger { border-left: 5px solid #e74c3c; }
+        .alert-title { font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; }
+        .alert.info .alert-title { color: #3498db; }
+        .alert.warning .alert-title { color: #f39c12; }
+        .alert.danger .alert-title { color: #e74c3c; }
+        .alert-time { font-size: 0.8rem; color: #999; margin-bottom: 8px; }
+        .alert-details { font-size: 0.9rem; color: #666; line-height: 1.4; }
+
+        /* PANEL DE IMPACTO */
+        .impact-panel {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 51, 160, 0.95); color: white;
+            padding: 15px 30px; border-radius: 15px; text-align: center; opacity: 0; transition: all 0.5s ease; z-index: 300; border: 2px solid #2ecc71;
+        }
+        .impact-show { opacity: 1; }
+        .impact-title { font-size: 1.2rem; font-weight: bold; color: #2ecc71; }
+        .impact-stats { display: flex; gap: 25px; margin-top: 10px; }
+        .impact-stat { text-align: center; }
+        .impact-number { font-size: 1.6rem; font-weight: bold; color: #fff; }
+        .impact-label { font-size: 0.85rem; color: #bdc3c7; }
+
+        .phase-indicator { position: absolute; bottom: 20px; right: 20px; background: rgba(0, 0, 0, 0.85); color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.95rem; font-weight: bold; z-index: 300; }
+
+        /* ANIMACIONES */
+        @keyframes pulse-ok { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes pulse-danger { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } }
+        @keyframes pulse-detected { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); } }
+        @keyframes pulse-contained { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); } }
+        @keyframes flow-attack { from { background-position: 0 0; } to { background-position: -50px 0; } }
+        @keyframes flow-blocked { from { background-position: 0 0; } to { background-position: 40px 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Solución de Seguridad "Best-of-Breed" para BCP</h1>
+            <p>Simulación de Defensa Integrada con Microsoft, CrowdStrike, Netskope y Palo Alto Networks</p>
+        </div>
+
+        <!-- CAPAS DE SEGURIDAD -->
+        <div class="security-layer layer-perimeter"><div class="layer-label">Capa 1: Perímetro y Email</div></div>
+        <div class="security-layer layer-endpoint"><div class="layer-label">Capa 2: Endpoint y Web</div></div>
+        <div class="security-layer layer-identity"><div class="layer-label">Capa 3: Identidad (Zero Trust)</div></div>
+        <div class="security-layer layer-network"><div class="layer-label">Capa 4: Red Interna</div></div>
+        <div class="security-layer layer-xdr"><div class="layer-label">Capa 5: Correlación y Respuesta (XDR)</div></div>
+
+        <!-- COMPONENTES -->
+        <div class="component attacker"><div class="component-icon">🏴‍☠️</div><div class="status-indicator compromised"></div><div class="component-label">Atacante</div></div>
+        <div class="component ms-defender-o365"><div class="component-icon">🛡️</div><div class="status-indicator" id="status-defender"></div><div class="component-label">Microsoft Defender for O365</div></div>
+        <div class="component employee-pc">
+            <div class="component-icon">🦅</div><div class="status-indicator" id="status-crowdstrike"></div>
+            <div class="component-label">PC Empleado (CrowdStrike Falcon)</div>
+        </div>
+        <div class="component netskope-sse"><div class="component-icon">🌐</div><div class="status-indicator" id="status-netskope"></div><div class="component-label">Netskope SSE</div></div>
+        <div class="component entra-id"><div class="component-icon">🔑</div><div class="status-indicator" id="status-entra"></div><div class="component-label">Microsoft Entra ID</div></div>
+        <div class="component palo-alto-fw"><div class="component-icon">🧱</div><div class="status-indicator" id="status-paloalto"></div><div class="component-label">Palo Alto Networks NGFW</div></div>
+        <div class="component critical-server"><div class="component-icon">🏦</div><div class="status-indicator" id="status-server"></div><div class="component-label">Servidor Crítico</div></div>
+        <div class="component ms-sentinel"><div class="component-icon">🧠</div><div class="status-indicator" id="status-sentinel"></div><div class="component-label">Microsoft Sentinel (SIEM/XDR)</div></div>
+        
+        <!-- CONEXIONES -->
+        <div class="connection" id="conn-email"></div>
+        <div class="connection" id="conn-web"></div>
+        <div class="connection" id="conn-lateral"></div>
+
+        <div class="alert-panel" id="alert-panel"></div>
+
+        <div class="impact-panel" id="impact-panel">
+            <div class="impact-title">✅ ATAQUE COMPLETAMENTE NEUTRALIZADO</div>
+            <div class="impact-stats">
+                <div class="impact-stat"><div class="impact-number">0</div><div class="impact-label">Sistemas Comprometidos</div></div>
+                <div class="impact-stat"><div class="impact-number">$0</div><div class="impact-label">Pérdidas Financieras</div></div>
+                <div class="impact-stat"><div class="impact-number">< 1 min</div><div class="impact-label">Tiempo de Contención</div></div>
+                <div class="impact-stat"><div class="impact-number">100%</div><div class="impact-label">Visibilidad del Incidente</div></div>
+            </div>
+        </div>
+
+        <div class="phase-indicator" id="phase-indicator">Iniciando simulación...</div>
+    </div>
+
+    <script>
+        let timeouts = [];
+        
+        const phases = [
+            "Fase 1: Atacante envía email de Spearphishing.",
+            "DEFENSA 1: Microsoft Defender for O365 analiza y bloquea el email.",
+            "Fase 2: (Sim) Empleado hace clic en un enlace malicioso.",
+            "DEFENSA 2: Netskope SSE intercepta y bloquea la conexión al sitio de phishing.",
+            "Fase 3: (Sim) Malware se ejecuta en el Endpoint.",
+            "DEFENSA 3: CrowdStrike Falcon detecta y contiene la amenaza en el endpoint.",
+            "Fase 4: (Sim) Atacante intenta movimiento lateral usando credenciales robadas.",
+            "DEFENSA 4: Microsoft Entra ID niega el acceso por falta de MFA.",
+            "Fase 5: Todos los eventos son correlacionados en Microsoft Sentinel.",
+            "RESULTADO: El ataque es contenido en múltiples capas. Incidente neutralizado."
+        ];
+
+        const alerts = [
+            { time: "T+00:00:02", title: "MS Defender: AMENAZA BLOQUEADA", details: "Email de 'soporte-urgente' bloqueado. La tecnología Safe Links identificó el enlace como malicioso y previno la entrega.", severity: "info", tool: "defender" },
+            { time: "T+00:00:06", title: "Netskope: ACCESO DENEGADO", details: "El PC del empleado intentó acceder a 'bancoxyz-seguridad.com'. URL clasificada como Phishing y bloqueada por política de SWG.", severity: "warning", tool: "netskope" },
+            { time: "T+00:00:11", title: "CrowdStrike: AMENAZA CRÍTICA DETECTADA", details: "Se ha detectado y bloqueado un comportamiento malicioso (T1059.001) en el host del empleado. El host ha sido aislado de la red por prevención.", severity: "danger", tool: "crowdstrike" },
+            { time: "T+00:00:16", title: "Entra ID: INICIO DE SESIÓN RIESGOSO", details: "Intento de acceso al Servidor Crítico desde una sesión de riesgo. Acceso bloqueado por política de Acceso Condicional que requiere MFA.", severity: "danger", tool: "entra" },
+            { time: "T+00:00:20", title: "Microsoft Sentinel: INCIDENTE MULTI-ETAPA CREADO", details: "Se correlacionaron 4 alertas de Defender, Netskope, CrowdStrike y Entra ID. Se ha abierto el Incidente IR-2024-101 y se ha ejecutado el playbook de respuesta automática.", severity: "danger", tool: "sentinel" }
+        ];
+
+        function updatePhase(idx) { document.getElementById('phase-indicator').textContent = phases[idx]; }
+        function showAlert(alertData) {
+            const panel = document.getElementById('alert-panel');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${alertData.severity}`;
+            const icon = {'info': 'ℹ️', 'warning': '⚠️', 'danger': '🚨'}[alertData.severity];
+            alertDiv.innerHTML = `<div class="alert-title">${icon} ${alertData.title}</div><div class="alert-time">${alertData.time}</div><div class="alert-details">${alertData.details}</div>`;
+            panel.prepend(alertDiv);
+            setTimeout(() => alertDiv.classList.add('alert-show'), 100);
+        }
+        function updateStatus(id, status) {
+            const indicator = document.getElementById(`status-${id}`);
+            if (indicator) {
+                indicator.className = 'status-indicator';
+                if (status) indicator.classList.add(status);
+            }
+        }
+        function drawConnection(id, from, to) {
+            const conn = document.getElementById(id), fromEl = document.querySelector(`.${from}`), toEl = document.querySelector(`.${to}`);
+            if (!conn || !fromEl || !toEl) return;
+            const fromRect = fromEl.getBoundingClientRect(), toRect = toEl.getBoundingClientRect(), containerRect = document.querySelector('.container').getBoundingClientRect();
+            const x1 = fromRect.left - containerRect.left + fromRect.width / 2, y1 = fromRect.top - containerRect.top + fromRect.height / 2;
+            const x2 = toRect.left - containerRect.left + toRect.width / 2, y2 = toRect.top - containerRect.top + toRect.height / 2;
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2), angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+            conn.style.width = `${length}px`; conn.style.left = `${x1}px`; conn.style.top = `${y1}px`; conn.style.transform = `rotate(${angle}deg)`;
+        }
+        function activateConnection(id, type) {
+            const conn = document.getElementById(id);
+            if (conn) { conn.className = 'connection'; conn.classList.add(type); }
+        }
+
+        function startSimulation() {
+            timeouts.forEach(clearTimeout); timeouts = [];
+            document.getElementById('alert-panel').innerHTML = '';
+            document.getElementById('impact-panel').classList.remove('impact-show');
+            ['defender', 'crowdstrike', 'netskope', 'entra', 'paloalto', 'server', 'sentinel'].forEach(id => updateStatus(id, ''));
+
+            drawConnection('conn-email', 'attacker', 'ms-defender-o365');
+            drawConnection('conn-web', 'employee-pc', 'netskope-sse');
+            drawConnection('conn-lateral', 'employee-pc', 'critical-server');
+
+            // --- SIMULATION SEQUENCE ---
+            timeouts.push(setTimeout(() => { updatePhase(0); activateConnection('conn-email', 'connection-attack'); }, 1000));
+            timeouts.push(setTimeout(() => { updatePhase(1); showAlert(alerts[0]); updateStatus('defender', 'detected'); activateConnection('conn-email', 'connection-blocked'); }, 3000));
+            
+            timeouts.push(setTimeout(() => { updatePhase(2); }, 5000));
+            timeouts.push(setTimeout(() => { updatePhase(3); activateConnection('conn-web', 'connection-attack'); }, 6000));
+            timeouts.push(setTimeout(() => { showAlert(alerts[1]); updateStatus('netskope', 'detected'); activateConnection('conn-web', 'connection-blocked'); }, 8000));
+
+            timeouts.push(setTimeout(() => { updatePhase(4); }, 10000));
+            timeouts.push(setTimeout(() => { updatePhase(5); showAlert(alerts[2]); updateStatus('crowdstrike', 'contained'); }, 11000));
+            
+            timeouts.push(setTimeout(() => { updatePhase(6); activateConnection('conn-lateral', 'connection-attack'); }, 13000));
+            timeouts.push(setTimeout(() => { updatePhase(7); showAlert(alerts[3]); updateStatus('entra', 'detected'); activateConnection('conn-lateral', 'connection-blocked'); }, 15000));
+
+            timeouts.push(setTimeout(() => { updatePhase(8); showAlert(alerts[4]); updateStatus('sentinel', 'detected'); }, 17000));
+
+            timeouts.push(setTimeout(() => { updatePhase(9); document.getElementById('impact-panel').classList.add('impact-show'); }, 19000));
+        }
+
+        window.addEventListener('load', () => {
+            startSimulation();
+        });
+        window.addEventListener('resize', () => { // Redraw connections on resize
+            drawConnection('conn-email', 'attacker', 'ms-defender-o365');
+            drawConnection('conn-web', 'employee-pc', 'netskope-sse');
+            drawConnection('conn-lateral', 'employee-pc', 'critical-server');
+        });
+    </script>
+</body>
+</html>

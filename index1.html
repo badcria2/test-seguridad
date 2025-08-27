@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solución de Seguridad en Profundidad - BCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            overflow: hidden;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #e9f1f8 0%, #d6e4f0 100%);
+        }
+        .header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: #0033a0;
+        }
+        .header p {
+            color: #555;
+            font-size: 0.9rem;
+        }
+        /* CAPAS DE SEGURIDAD */
+        .security-layer {
+            position: absolute;
+            width: 100%;
+            border-bottom: 2px dashed #a0b4c8;
+            padding: 10px 0;
+        }
+        .layer-label {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #34495e;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #007bff;
+        }
+        .internet-layer { top: 70px; height: 110px; background: rgba(231, 76, 60, 0.03); }
+        .perimeter-layer { top: 180px; height: 120px; background: rgba(243, 156, 18, 0.05); }
+        .network-layer { top: 300px; height: 150px; background: rgba(46, 204, 113, 0.05); }
+        .endpoint-layer { top: 450px; height: 140px; background: rgba(52, 152, 219, 0.05); }
+        .data-iam-layer { top: 590px; height: 130px; background: rgba(155, 89, 182, 0.05); }
+
+        /* COMPONENTES DE SEGURIDAD */
+        .component {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .component:hover { transform: scale(1.05); }
+        .component-icon {
+            width: 45px; height: 45px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin: 0 auto; background: #fff;
+            border: 2px solid #ddd; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .component-label {
+            position: absolute; bottom: -28px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: bold; color: #333;
+            white-space: nowrap; box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            position: absolute; top: -5px; right: -5px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #2ecc71; border: 2px solid #fff;
+            animation: pulse-ok 2s infinite;
+        }
+        .compromised { background: #e74c3c !important; animation: pulse-danger 1s infinite; }
+        .warning { background: #f39c12 !important; animation: pulse-warning 1.5s infinite; }
+        .detected { background: #3498db !important; animation: pulse-detected 1.2s infinite; }
+
+        /* POSICIONES */
+        .attacker { top: 90px; left: 100px; }
+        .proxmox-gw { top: 95px; right: 150px; }
+        .pfsense-fw { top: 210px; left: 50%; transform: translateX(-50%); }
+        .suricata-ids { top: 330px; left: 200px; }
+        .wazuh-siem { top: 340px; right: 200px; }
+        .employee-pc { top: 480px; left: 150px; }
+        .admin-pc { top: 490px; right: 450px; }
+        .keycloak-iam { top: 620px; left: 250px; }
+        .database-server { top: 630px; left: 50%; transform: translateX(-50%); }
+        .core-banking { top: 625px; right: 180px; }
+        
+        /* CONEXIONES */
+        .connection {
+            position: absolute; height: 3px;
+            background: #bdc3c7; transform-origin: left center;
+            opacity: 0; transition: all 0.5s ease; z-index: 1;
+        }
+        .connection-active { opacity: 0.6; animation: flow-ok 2s infinite; }
+        .connection-attack { background: #e74c3c; opacity: 1; animation: flow-attack 1s infinite; box-shadow: 0 0 10px #e74c3c; }
+        .connection-blocked { background: repeating-linear-gradient(45deg, #e74c3c, #e74c3c 10px, #f8f9fa 10px, #f8f9fa 20px); opacity: 1; animation: flow-blocked 1.5s infinite linear; }
+
+        /* PANEL DE ALERTAS */
+        .alert-panel {
+            position: absolute; top: 90px; right: 20px; width: 380px;
+            max-height: calc(100vh - 120px); overflow-y: auto; z-index: 200;
+        }
+        .alert {
+            background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            opacity: 0; transform: translateX(50px);
+            transition: all 0.5s ease;
+        }
+        .alert-show { opacity: 1; transform: translateX(0); }
+        .alert.info { border-left: 5px solid #3498db; }
+        .alert.warning { border-left: 5px solid #f39c12; }
+        .alert.danger { border-left: 5px solid #e74c3c; }
+        .alert-title { font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; }
+        .alert.info .alert-title { color: #3498db; }
+        .alert.warning .alert-title { color: #f39c12; }
+        .alert.danger .alert-title { color: #e74c3c; }
+        .alert-time { font-size: 0.8rem; color: #999; margin-bottom: 8px; }
+        .alert-details { font-size: 0.9rem; color: #666; line-height: 1.4; }
+
+        /* PANEL DE IMPACTO MITIGADO */
+        .impact-panel {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 51, 160, 0.95); color: white;
+            padding: 15px 30px; border-radius: 15px; text-align: center;
+            opacity: 0; transition: all 0.5s ease; z-index: 300; border: 2px solid #3498db;
+        }
+        .impact-show { opacity: 1; }
+        .impact-stats { display: flex; gap: 25px; margin-top: 10px; }
+        .impact-stat { text-align: center; }
+        .impact-number { font-size: 1.6rem; font-weight: bold; color: #2ecc71; }
+        .impact-label { font-size: 0.85rem; color: #bdc3c7; }
+
+        .phase-indicator {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 8px 18px; border-radius: 20px;
+            font-size: 0.95rem; font-weight: bold; z-index: 300;
+        }
+
+        /* ANIMACIONES */
+        @keyframes pulse-ok { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes pulse-danger { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); } }
+        @keyframes pulse-warning { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(243, 156, 18, 0); } }
+        @keyframes pulse-detected { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); } }
+        @keyframes flow-attack { 0% { background-position: 0 0; } 100% { background-position: 50px 0; } }
+        @keyframes flow-blocked { 0% { background-position: 0 0; } 100% { background-position: 40px 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Arquitectura de Seguridad en Profundidad - Propuesta de Solución BCP</h1>
+            <p>Simulación de Detección y Respuesta a un Ciberataque con Herramientas Open-Source</p>
+        </div>
+
+        <!-- CAPAS DE SEGURIDAD -->
+        <div class="security-layer internet-layer"><div class="layer-label">Capa 1: Internet (Origen del Ataque)</div></div>
+        <div class="security-layer perimeter-layer"><div class="layer-label">Capa 2: Perímetro (Firewall / Gateway de Correo)</div></div>
+        <div class="security-layer network-layer"><div class="layer-label">Capa 3: Red Interna (Detección y Visibilidad)</div></div>
+        <div class="security-layer endpoint-layer"><div class="layer-label">Capa 4: Endpoint (Estaciones y Servidores)</div></div>
+        <div class="security-layer data-iam-layer"><div class="layer-label">Capa 5: Datos e Identidad (Activos Críticos)</div></div>
+
+        <!-- COMPONENTES -->
+        <div class="component attacker">
+            <div class="component-icon">🏴‍☠️</div>
+            <div class="status-indicator compromised" id="status-attacker"></div>
+            <div class="component-label">Atacante / C&C</div>
+        </div>
+        <div class="component proxmox-gw">
+            <div class="component-icon">📧</div>
+            <div class="status-indicator" id="status-proxmox"></div>
+            <div class="component-label">Proxmox Mail GW</div>
+        </div>
+        <div class="component pfsense-fw">
+            <div class="component-icon">🛡️</div>
+            <div class="status-indicator" id="status-pfsense"></div>
+            <div class="component-label">pfSense / OPNsense Firewall</div>
+        </div>
+        <div class="component suricata-ids">
+            <div class="component-icon">🚦</div>
+            <div class="status-indicator" id="status-suricata"></div>
+            <div class="component-label">Suricata IDS/IPS</div>
+        </div>
+        <div class="component wazuh-siem">
+            <div class="component-icon">📈</div>
+            <div class="status-indicator" id="status-wazuh"></div>
+            <div class="component-label">Wazuh SIEM / XDR</div>
+        </div>
+        <div class="component employee-pc">
+            <div class="component-icon">👤</div>
+            <div class="status-indicator" id="status-employee"></div>
+            <div class="component-label">PC de Empleado</div>
+        </div>
+        <div class="component admin-pc">
+            <div class="component-icon">👨‍💼</div>
+            <div class="status-indicator" id="status-admin"></div>
+            <div class="component-label">PC de Administrador</div>
+        </div>
+        <div class="component keycloak-iam">
+            <div class="component-icon">🔑</div>
+            <div class="status-indicator" id="status-keycloak"></div>
+            <div class="component-label">Keycloak IAM (MFA)</div>
+        </div>
+        <div class="component database-server">
+            <div class="component-icon">🗄️</div>
+            <div class="status-indicator" id="status-db"></div>
+            <div class="component-label">Base de Datos Sensible</div>
+        </div>
+        <div class="component core-banking">
+            <div class="component-icon">🏦</div>
+            <div class="status-indicator" id="status-core"></div>
+            <div class="component-label">Core Bancario</div>
+        </div>
+        
+        <!-- CONEXIONES -->
+        <div class="connection" id="conn-attack-email"></div>
+        <div class="connection" id="conn-phishing-link"></div>
+        <div class="connection" id="conn-lateral-movement"></div>
+        <div class="connection" id="conn-data-exfil"></div>
+        
+        <div class="alert-panel" id="alert-panel"></div>
+
+        <div class="impact-panel" id="impact-panel">
+            <div style="font-size: 1.2rem; font-weight: bold; color: #2ecc71;">✅ ATAQUE CONTENIDO EXITOSAMENTE</div>
+            <div class="impact-stats">
+                <div class="impact-stat">
+                    <div class="impact-number" id="files-encrypted">0</div>
+                    <div class="impact-label">Archivos Cifrados</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number">$0</div>
+                    <div class="impact-label">Pérdidas Directas</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number">99.9%</div>
+                    <div class="impact-label">Disponibilidad</div>
+                </div>
+                <div class="impact-stat">
+                    <div class="impact-number">4/4</div>
+                    <div class="impact-label">Controles Actuaron</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #555; font-size: 0.9rem; color: #bdc3c7;">
+                <strong>Técnicas MITRE ATT&CK DETECTADAS y BLOQUEADAS:</strong><br>
+                T1566.002 (Spearphishing Link) | T1078 (Valid Accounts) | T1021 (Remote Services)
+            </div>
+        </div>
+
+        <div class="phase-indicator" id="phase-indicator">Iniciando simulación...</div>
+    </div>
+
+    <script>
+        let timeouts = [];
+        
+        const phases = [
+            "Fase 1: Atacante envía email de Spearphishing",
+            "Fase 2: Proxmox Mail GW detecta y pone en cuarentena el correo",
+            "Fase 3: (Sim) Empleado hace clic en un enlace malicioso",
+            "Fase 4: pfSense Firewall bloquea el acceso al sitio de Phishing",
+            "Fase 5: (Sim) Malware se ejecuta en el Endpoint",
+            "Fase 6: Wazuh Agent detecta y bloquea el proceso malicioso",
+            "Fase 7: (Sim) Atacante intenta movimiento lateral con credenciales robadas",
+            "Fase 8: Keycloak IAM bloquea el acceso por falta de MFA",
+            "Fase 9: Suricata IDS detecta el intento de escaneo interno",
+            "Fase 10: Ataque contenido. Incidente reportado al SIEM.",
+            "Fase 11: Impacto del ataque: MÍNIMO. Defensa exitosa."
+        ];
+
+        const alerts = [
+            { time: "T+00:00:03", title: "Proxmox Mail GW - AMENAZA DETECTADA", details: "Email con enlace de phishing de alto riesgo (phishing.io) fue puesto en cuarentena. Origen: 189.55.34.12", severity: "info", tool: "proxmox" },
+            { time: "T+00:00:08", title: "pfSense Firewall - TRÁFICO BLOQUEADO", details: "El PC del empleado (10.1.10.55) intentó acceder a un dominio malicioso en la lista negra. Conexión denegada.", severity: "warning", tool: "pfsense" },
+            { time: "T+00:00:15", title: "Wazuh Agent - ALERTA CRÍTICA", details: "Proceso no autorizado ('svchost.exe' desde C:\\Users\\Temp) ejecutado en el PC del empleado. Amenaza contenida y proceso terminado.", severity: "danger", tool: "employee" },
+            { time: "T+00:00:22", title: "Keycloak IAM - ACCESO DENEGADO", details: "Intento de inicio de sesión fallido en Servidor DB desde IP interna anómala (10.1.10.55). Fallo en la verificación MFA.", severity: "danger", tool: "keycloak" },
+            { time: "T+00:00:25", title: "Suricata IDS - ACTIVIDAD SOSPECHOSA", details: "Detectado escaneo de red (Nmap) originado desde 10.1.10.55 hacia el segmento de servidores críticos. Regla ET SCAN.", severity: "warning", tool: "suricata" },
+            { time: "T+00:00:30", title: "Wazuh SIEM - INCIDENTE CORRELACIONADO", details: "Múltiples alertas de Phishing, Malware y Movimiento Lateral asociadas a un solo host. Se ha creado el caso de incidente #2024-034.", severity: "danger", tool: "wazuh" }
+        ];
+
+        function updatePhase(phaseIndex) {
+            document.getElementById('phase-indicator').textContent = phases[phaseIndex] || "Simulación Finalizada";
+        }
+
+        function showAlert(alertData) {
+            const panel = document.getElementById('alert-panel');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${alertData.severity}`;
+            const icon = {'info': 'ℹ️', 'warning': '⚠️', 'danger': '🚨'}[alertData.severity];
+            alertDiv.innerHTML = `<div class="alert-title">${icon} ${alertData.title}</div><div class="alert-time">${alertData.time}</div><div class="alert-details">${alertData.details}</div>`;
+            panel.prepend(alertDiv);
+            setTimeout(() => alertDiv.classList.add('alert-show'), 100);
+        }
+
+        function updateStatus(componentId, status) {
+            const indicator = document.getElementById(`status-${componentId}`);
+            if (indicator) {
+                indicator.className = 'status-indicator'; // Reset
+                if (status) indicator.classList.add(status);
+            }
+        }
+
+        function drawConnection(connId, from, to) {
+            const conn = document.getElementById(connId);
+            const fromEl = document.querySelector(`.${from}`).getBoundingClientRect();
+            const toEl = document.querySelector(`.${to}`).getBoundingClientRect();
+            const container = document.querySelector('.container').getBoundingClientRect();
+
+            const x1 = fromEl.left - container.left + fromEl.width / 2;
+            const y1 = fromEl.top - container.top + fromEl.height / 2;
+            const x2 = toEl.left - container.left + toEl.width / 2;
+            const y2 = toEl.top - container.top + toEl.height / 2;
+
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+
+            conn.style.width = `${length}px`;
+            conn.style.left = `${x1}px`;
+            conn.style.top = `${y1}px`;
+            conn.style.transform = `rotate(${angle}deg)`;
+        }
+        
+        function activateConnection(connId, type) {
+            const conn = document.getElementById(connId);
+            conn.className = 'connection'; // Reset
+            conn.classList.add(type);
+        }
+
+        function startSimulation() {
+            timeouts.forEach(clearTimeout);
+            timeouts = [];
+            
+            // Initial state
+            document.getElementById('alert-panel').innerHTML = '';
+            document.getElementById('impact-panel').classList.remove('impact-show');
+            ['proxmox', 'pfsense', 'suricata', 'wazuh', 'employee', 'admin', 'keycloak', 'db', 'core'].forEach(id => updateStatus(id, ''));
+
+            // Redraw connections
+            drawConnection('conn-attack-email', 'attacker', 'proxmox-gw');
+            drawConnection('conn-phishing-link', 'employee-pc', 'pfsense-fw');
+            drawConnection('conn-lateral-movement', 'employee-pc', 'database-server');
+            
+            // --- SIMULATION SEQUENCE ---
+            timeouts.push(setTimeout(() => {
+                updatePhase(0);
+                activateConnection('conn-attack-email', 'connection-attack');
+            }, 1000));
+            
+            timeouts.push(setTimeout(() => {
+                updatePhase(1);
+                showAlert(alerts[0]);
+                updateStatus('proxmox', 'detected');
+                activateConnection('conn-attack-email', 'connection-blocked');
+            }, 3000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(2);
+                updateStatus('employee', 'warning');
+            }, 5000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(3);
+                activateConnection('conn-phishing-link', 'connection-attack');
+            }, 6000));
+
+            timeouts.push(setTimeout(() => {
+                showAlert(alerts[1]);
+                updateStatus('pfsense', 'detected');
+                activateConnection('conn-phishing-link', 'connection-blocked');
+            }, 8000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(4);
+                updateStatus('employee', 'compromised');
+            }, 10000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(5);
+                showAlert(alerts[2]);
+                updateStatus('employee', 'detected');
+                updateStatus('wazuh', 'detected');
+            }, 12000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(6);
+                activateConnection('conn-lateral-movement', 'connection-attack');
+            }, 14000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(7);
+                showAlert(alerts[3]);
+                updateStatus('keycloak', 'detected');
+                activateConnection('conn-lateral-movement', 'connection-blocked');
+            }, 16000));
+            
+            timeouts.push(setTimeout(() => {
+                updatePhase(8);
+                showAlert(alerts[4]);
+                updateStatus('suricata', 'detected');
+            }, 18000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(9);
+                showAlert(alerts[5]);
+            }, 20000));
+
+            timeouts.push(setTimeout(() => {
+                updatePhase(10);
+                document.getElementById('impact-panel').classList.add('impact-show');
+            }, 22000));
+        }
+
+        window.addEventListener('load', () => {
+            startSimulation();
+        });
+    </script>
+</body>
+</html>
